@@ -1,35 +1,21 @@
+import 'package:custom_running_app/device_list_page.dart';
+import 'package:custom_running_app/global%20widgets/default_app_bar.dart';
 import 'package:custom_running_app/services/bluetooth_service.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  await BluetoothService.reconnectToLastDevice();
   runApp(const MyApp());
-  BluetoothService.initBluetooth();
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
@@ -48,50 +34,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    var screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
+      appBar: DefaultAppBar(widget.title),
       body: Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Expanded(
-          child: StreamBuilder(
-              stream: BluetoothService.getBluetoothDeviceList(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Text('Something went wrong');
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                }
-
-                List<ListTile> listToReturn = snapshot.data!.map((device) {
-                  return ListTile(
-                    onTap: () {
-                      BluetoothService.testDevice(device.device);
-                    },
-                    title: Text(device.device.advName),
-                    leading: Text(device.device.remoteId.str),
-                  );
-                }).toList();
-                return ListView(
-                  children: listToReturn,
-                );
-              }),
-        ),
-      ])),
+          child: SizedBox(
+        width: screenWidth * 0.9,
+        child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
+          if (!BluetoothService.deviceConnected())
+            Card(
+              child: ListTile(
+                onTap: () {
+                  Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DeviceListPage()))
+                      .then((onValue) {
+                    setState(() {});
+                  });
+                },
+                title: Text("Nie połączono z urządzeniem"),
+              ),
+            ),
+          if (BluetoothService.deviceConnected())
+            ElevatedButton(
+                onPressed: () async {
+                  await BluetoothService.disconnectFromDevice();
+                  setState(() {});
+                },
+                child: Text("Rozłącz z bieżnią"))
+        ]),
+      )),
     );
   }
 }

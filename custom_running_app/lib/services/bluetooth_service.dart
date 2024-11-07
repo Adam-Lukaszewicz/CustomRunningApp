@@ -1,39 +1,28 @@
 import 'dart:io';
 
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 class BluetoothService {
   static bool serviceEnabled = false;
-
   static void initBluetooth() async {
-    // first, check if bluetooth is supported by your hardware
-// Note: The platform is initialized on the first call to any FlutterBluePlus method.
     if (await FlutterBluePlus.isSupported == false) {
       print("Bluetooth not supported by this device");
       return;
     }
-
-// handle bluetooth on & off
-// note: for iOS the initial state is typically BluetoothAdapterState.unknown
-// note: if you have permissions issues you will get stuck at BluetoothAdapterState.unauthorized
-    var subscription =
-        FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
-      print(state);
-      if (state == BluetoothAdapterState.on) {
-        // usually start scanning, connecting, etc
-      } else {
-        // show an error to the user, etc
-      }
-    });
-
-// turn on bluetooth ourself if we can
-// for iOS, the user controls bluetooth enable/disable
     if (Platform.isAndroid) {
       await FlutterBluePlus.turnOn();
     }
+  }
 
-// cancel to prevent duplicate listeners
-    subscription.cancel();
+  static void reconnectToLastDevice() async {
+    Directory appDir = await getApplicationDocumentsDirectory();
+    File savedId = File('${appDir.path}/remoteId');
+    if (savedId.existsSync()) {
+      print("found save id");
+      String bluetoothId = await savedId.readAsString();
+      await BluetoothDevice.fromId(bluetoothId).connect();
+    }
   }
 
   static Stream<List<ScanResult>> getBluetoothDeviceList() {
@@ -118,5 +107,36 @@ class BluetoothService {
 
 // cancel to prevent duplicate listeners
     subscription.cancel();
+  }
+
+  static Future<void> connectToDevice(BluetoothDevice device) async {
+    await device.connect();
+    Directory appDir = await getApplicationDocumentsDirectory();
+    File savedId = File('${appDir.path}/remoteId');
+    if (!savedId.existsSync()) {
+      savedId.create();
+    } else {
+      savedId.deleteSync();
+    }
+    savedId.writeAsString(device.remoteId.str);
+  }
+
+  static Future<void> disconnectFromDevice() async {
+    if (FlutterBluePlus.connectedDevices.isEmpty)
+      throw Exception("No connected devices");
+    BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
+    await device.disconnect();
+    Directory appDir = await getApplicationDocumentsDirectory();
+    File('${appDir.path}/remoteId').deleteSync();
+  }
+
+  static void writeSpeedToDevice(int speed) {
+    if (FlutterBluePlus.connectedDevices.isEmpty)
+      throw Exception("No connected devices");
+    BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
+  }
+
+  static bool deviceConnected() {
+    return FlutterBluePlus.connectedDevices.isNotEmpty;
   }
 }
