@@ -9,11 +9,12 @@ class DefaultAppBar extends StatelessWidget implements PreferredSizeWidget{
   Widget build(BuildContext context){
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      foregroundColor: Colors.white,
+      centerTitle: true,
       title: Text(text),
     );
   }
   
   @override
-  // TODO: implement preferredSize
   Size get preferredSize => AppBar().preferredSize;
 }

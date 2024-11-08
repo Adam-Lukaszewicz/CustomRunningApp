@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 class BluetoothService {
   static bool serviceEnabled = false;
-  static void initBluetooth() async {
+  static Future<void> initBluetooth() async {
     if (await FlutterBluePlus.isSupported == false) {
       print("Bluetooth not supported by this device");
       return;
@@ -15,7 +15,7 @@ class BluetoothService {
     }
   }
 
-  static void reconnectToLastDevice() async {
+  static Future<void> reconnectToLastDevice() async {
     Directory appDir = await getApplicationDocumentsDirectory();
     File savedId = File('${appDir.path}/remoteId');
     if (savedId.existsSync()) {
@@ -81,10 +81,10 @@ class BluetoothService {
     await device.connect();
     // Note: You must call discoverServices after every re-connection!
     var services = await device.discoverServices();
-    services.forEach((service) {
+    for (var service in services) {
       if (service.serviceUuid.toString() ==
           "cd9cfc21-0ecc-42e5-bf22-48aa715ca112") {
-        service.characteristics.forEach((characteristic) async {
+        for(var characteristic in service.characteristics) {
           if (characteristic.uuid.toString() ==
               "66E5FFCE-AA96-4DC9-90C3-C62BBCCD29AC".toLowerCase()) {
             String toWrite = "TEST";
@@ -97,10 +97,10 @@ class BluetoothService {
               print(String.fromCharCodes(value));
             }
           }
-        });
+        }
       }
       // do something with service
-    });
+    }
 
 // Disconnect from device
     await device.disconnect();
@@ -122,8 +122,9 @@ class BluetoothService {
   }
 
   static Future<void> disconnectFromDevice() async {
-    if (FlutterBluePlus.connectedDevices.isEmpty)
+    if (FlutterBluePlus.connectedDevices.isEmpty) {
       throw Exception("No connected devices");
+    }
     BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
     await device.disconnect();
     Directory appDir = await getApplicationDocumentsDirectory();
@@ -131,9 +132,10 @@ class BluetoothService {
   }
 
   static void writeSpeedToDevice(int speed) {
-    if (FlutterBluePlus.connectedDevices.isEmpty)
+    if (FlutterBluePlus.connectedDevices.isEmpty) {
       throw Exception("No connected devices");
-    BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
+    }
+    //BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
   }
 
   static bool deviceConnected() {
