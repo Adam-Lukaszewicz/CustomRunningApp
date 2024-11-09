@@ -1,6 +1,7 @@
 import 'package:custom_running_app/device_list_page.dart';
 import 'package:custom_running_app/global%20widgets/default_app_bar.dart';
 import 'package:custom_running_app/services/bluetooth_service.dart';
+import 'package:custom_running_app/training_page.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -14,7 +15,6 @@ class HomePage extends WatchingStatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   void initState() {
     GetIt.I.get<BluetoothService>().reconnectToLastDevice();
@@ -24,7 +24,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
-    bool deviceConnected = watchPropertyValue((BluetoothService bt) => bt.isConnected);
+    bool deviceConnected =
+        watchPropertyValue((BluetoothService bt) => bt.isConnected);
     return Scaffold(
       appBar: DefaultAppBar(widget.title),
       body: Center(
@@ -46,6 +47,16 @@ class _HomePageState extends State<HomePage> {
                 title: Text("Nie połączono z urządzeniem"),
               ),
             ),
+          ElevatedButton(
+              onPressed: deviceConnected
+                  ? () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TrainingPage()));
+                    }
+                  : null,
+              child: Text("Trening")),
           if (deviceConnected)
             ElevatedButton(
                 onPressed: () async {

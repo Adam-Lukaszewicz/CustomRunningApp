@@ -3,7 +3,7 @@ import 'package:custom_running_app/services/bluetooth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
-class DeviceListPage extends WatchingStatefulWidget{
+class DeviceListPage extends StatefulWidget{
   const DeviceListPage({super.key});
 
   @override
