@@ -1,11 +1,20 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-class BluetoothService {
-  static bool serviceEnabled = false;
-  static Future<void> initBluetooth() async {
+class BluetoothService extends ChangeNotifier{
+  bool serviceEnabled = false;
+
+  bool get isConnected => _isConnected;
+  bool _isConnected = false;
+  set isConnected(bool value){
+    _isConnected = value;
+    notifyListeners();
+  }
+
+  Future<void> initBluetooth() async {
     if (await FlutterBluePlus.isSupported == false) {
       print("Bluetooth not supported by this device");
       return;
@@ -15,17 +24,18 @@ class BluetoothService {
     }
   }
 
-  static Future<void> reconnectToLastDevice() async {
+ Future<void> reconnectToLastDevice() async {
     Directory appDir = await getApplicationDocumentsDirectory();
     File savedId = File('${appDir.path}/remoteId');
     if (savedId.existsSync()) {
       print("found save id");
       String bluetoothId = await savedId.readAsString();
       await BluetoothDevice.fromId(bluetoothId).connect();
+      isConnected = true;
     }
   }
 
-  static Stream<List<ScanResult>> getBluetoothDeviceList() {
+   Stream<List<ScanResult>> getBluetoothDeviceList() {
     var subscription = FlutterBluePlus.onScanResults.listen(
       (results) {
         if (results.isNotEmpty) {
@@ -55,7 +65,7 @@ class BluetoothService {
     return FlutterBluePlus.onScanResults;
   }
 
-  static void testDevice(BluetoothDevice device) async {
+ void testDevice(BluetoothDevice device) async {
     // listen for disconnection
     var subscription =
         device.connectionState.listen((BluetoothConnectionState state) async {
@@ -109,7 +119,7 @@ class BluetoothService {
     subscription.cancel();
   }
 
-  static Future<void> connectToDevice(BluetoothDevice device) async {
+  Future<void> connectToDevice(BluetoothDevice device) async {
     await device.connect();
     Directory appDir = await getApplicationDocumentsDirectory();
     File savedId = File('${appDir.path}/remoteId');
@@ -118,27 +128,26 @@ class BluetoothService {
     } else {
       savedId.deleteSync();
     }
+    isConnected = true;
     savedId.writeAsString(device.remoteId.str);
   }
 
-  static Future<void> disconnectFromDevice() async {
+  Future<void> disconnectFromDevice() async {
     if (FlutterBluePlus.connectedDevices.isEmpty) {
       throw Exception("No connected devices");
     }
     BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
     await device.disconnect();
+    isConnected = false;
     Directory appDir = await getApplicationDocumentsDirectory();
     File('${appDir.path}/remoteId').deleteSync();
   }
 
-  static void writeSpeedToDevice(int speed) {
-    if (FlutterBluePlus.connectedDevices.isEmpty) {
+  void writeSpeedToDevice(int speed) {
+    if (!_isConnected) {
       throw Exception("No connected devices");
     }
     //BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
   }
 
-  static bool deviceConnected() {
-    return FlutterBluePlus.connectedDevices.isNotEmpty;
-  }
 }

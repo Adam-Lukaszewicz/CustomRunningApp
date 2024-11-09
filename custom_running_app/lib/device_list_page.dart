@@ -1,8 +1,9 @@
 import 'package:custom_running_app/global%20widgets/default_app_bar.dart';
 import 'package:custom_running_app/services/bluetooth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 
-class DeviceListPage extends StatefulWidget{
+class DeviceListPage extends WatchingStatefulWidget{
   const DeviceListPage({super.key});
 
   @override
@@ -22,7 +23,7 @@ class _DeviceListPageState extends State<DeviceListPage> {
             children: [
               Expanded(
             child: StreamBuilder(
-                stream: BluetoothService.getBluetoothDeviceList(),
+                stream: GetIt.I.get<BluetoothService>().getBluetoothDeviceList(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return const Text('Something went wrong');
@@ -38,7 +39,7 @@ class _DeviceListPageState extends State<DeviceListPage> {
                         setState(() {
                           _isLoading = true;
                         });
-                        await BluetoothService.connectToDevice(device.device);
+                        await GetIt.I.get<BluetoothService>().connectToDevice(device.device);
                         setState(() {
                           _isLoading = false;
                         });

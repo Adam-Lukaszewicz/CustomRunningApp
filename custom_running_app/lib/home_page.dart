@@ -2,8 +2,9 @@ import 'package:custom_running_app/device_list_page.dart';
 import 'package:custom_running_app/global%20widgets/default_app_bar.dart';
 import 'package:custom_running_app/services/bluetooth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends WatchingStatefulWidget {
   const HomePage({super.key, required this.title});
 
   final String title;
@@ -15,15 +16,22 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   @override
+  void initState() {
+    GetIt.I.get<BluetoothService>().reconnectToLastDevice();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
+    bool deviceConnected = watchPropertyValue((BluetoothService bt) => bt.isConnected);
     return Scaffold(
       appBar: DefaultAppBar(widget.title),
       body: Center(
           child: SizedBox(
         width: screenWidth * 0.9,
         child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-          if (!BluetoothService.deviceConnected())
+          if (!deviceConnected)
             Card(
               child: ListTile(
                 onTap: () {
@@ -38,10 +46,10 @@ class _HomePageState extends State<HomePage> {
                 title: Text("Nie połączono z urządzeniem"),
               ),
             ),
-          if (BluetoothService.deviceConnected())
+          if (deviceConnected)
             ElevatedButton(
                 onPressed: () async {
-                  await BluetoothService.disconnectFromDevice();
+                  await GetIt.I.get<BluetoothService>().disconnectFromDevice();
                   setState(() {});
                 },
                 child: Text("Rozłącz z bieżnią"))
