@@ -147,7 +147,15 @@ class BluetoothService extends ChangeNotifier{
     if (!_isConnected) {
       throw Exception("No connected devices");
     }
+    //TODO: Implement
     //BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
   }
 
+  void writeAngleToDevice(int angle) {
+    if (!_isConnected) {
+      throw Exception("No connected devices");
+    }
+    //TODO: Implement
+    //BluetoothDevice device = FlutterBluePlus.connectedDevices.first;
+  }
 }
