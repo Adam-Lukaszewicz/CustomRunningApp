@@ -6,14 +6,44 @@ int downPin = D3;          // Pin do obniżania bieżni
 int motorPwmPin = D2;      // Pin, na którym będzie generowany PWM
 int speedReadPin = D4;     // Pin D4 do przerwania
 int ledPin = D0;           // Wbudowana dioda LED na pinie D0
-String incomingCommand = "";
 
 // zmienne pomocnicze
 unsigned long startTime;     // Czas rozpoczęcia
-int pwmValue = 0;            // Wartość PWM, która będzie się zmieniać
+int pwmValue = 5;            // Wartość PWM, która będzie się zmieniać
 int targetValue = 255 * 0.3; // Docelowa wartość PWM (30% z 255)
+String incomingCommand = "";
+int single_rotation_duration = 0; // czas będzie przechowywany w milisekundach
 
-#define potentiometer_min_value 1100
+unsigned long lastInterruptTime = 0; // Czas, ostatniego pomiaru
+unsigned long interruptInterval = 0; // Czas, ostatniego pomiaru
+
+enum motor {
+  speedUp = 0,
+  slowDown = 1,
+  m_standby = 2,
+  turnOff = 3,
+  turnOn = 4,
+};
+
+#define single_rotation_distance 130.31 // in mm
+#define km_to_mm (1000 * 100 * 10)
+#define h_to_ms (60 * 60 * 1000)
+void get_rotation_time_from_speed(double speed) {
+  if (speed == 0) {
+
+    return;
+  }
+  if (speed < 1 || speed > 16) {
+    return;
+  }
+  double mm_per_h = speed * km_to_mm;
+  double mm_per_ms = mm_per_h / h_to_ms;
+  single_rotation_duration = single_rotation_distance / mm_per_ms;
+  Serial.print("Ustawiono interwał na: ");
+  Serial.println(single_rotation_duration);
+}
+
+#define potentiometer_min_value 1000
 #define potentiometer_max_value 110
 #define treadmill_min_incline 0.0
 #define treadmill_max_incline 10.0
@@ -49,9 +79,11 @@ void set_potentiometr_value_for_incline(double incline) {
                 (treadmill_max_incline - treadmill_min_incline) +
             potentiometer_min_value);
   }
-  if (givenIncline.givenValue > analogRead(potentiometerPin)) {
+  if (givenIncline.givenValue > analogRead(potentiometerPin) &&
+      givenIncline.givenValue > potentiometer_min_value) {
     givenIncline.givenState = state::rising;
-  } else if (givenIncline.givenValue < analogRead(potentiometerPin)) {
+  } else if (givenIncline.givenValue < analogRead(potentiometerPin) &&
+             givenIncline.givenValue < potentiometer_max_value) {
     givenIncline.givenState = state::lowering;
   } else {
     givenIncline.givenState = state::standby;
@@ -87,8 +119,24 @@ void change_incline() {
 
 // Funkcja obsługująca przerwanie
 ICACHE_RAM_ATTR void handleInterrupt() {
-  digitalWrite(ledPin, HIGH); // Włącz LED               // Czekaj 100 ms
-  digitalWrite(ledPin, LOW);  // Wyłącz LED
+
+  unsigned long currentInterruptTime =
+      millis(); // Zapisz czas obecnego przerwania
+  interruptInterval = currentInterruptTime -
+                      lastInterruptTime; // Oblicz czas od ostatniego przerwania
+  lastInterruptTime =
+      currentInterruptTime; // Zaktualizuj czas ostatniego przerwania
+
+  if (interruptInterval > single_rotation_duration) {
+    // Serial.println("zwiekszenie predkosci");
+    pwmValue += 1;
+    analogWrite(motorPwmPin, pwmValue);
+  } else if (interruptInterval < single_rotation_duration) {
+    if (pwmValue > 10) {
+      pwmValue -= 1;
+      analogWrite(motorPwmPin, pwmValue);
+    }
+  }
 }
 
 void setup() {
@@ -111,19 +159,9 @@ void setup() {
   startTime = millis();
   set_potentiometr_value_for_incline(0);
   // stopniowo rozpędź silnik
-  while (true) {
-    unsigned long elapsedTime = millis() - startTime;
+  analogWrite(motorPwmPin, pwmValue);
 
-    if (elapsedTime > 10000) {
-      break; // Zakończenie pętli po 10 sekundach
-    }
-
-    pwmValue = map(elapsedTime, 0, 10000, 0,
-                   targetValue); // Mapa czasu na zakres od 0 do docelowego PWM
-    analogWrite(motorPwmPin, pwmValue); // Ustaw PWM na pinie
-
-    ESP.wdtFeed(); // Feed the watchdog timer
-  }
+  get_rotation_time_from_speed(1);
 }
 
 void loop() {
@@ -161,5 +199,8 @@ void recive_serial_command() {
 void handle_serial_command(String name, double param) {
   if (name == "incline") {
     set_potentiometr_value_for_incline(param);
+  }
+  if (name == "speed") {
+    get_rotation_time_from_speed(param);
   }
 }
