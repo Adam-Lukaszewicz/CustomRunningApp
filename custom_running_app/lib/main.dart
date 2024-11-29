@@ -15,10 +15,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
+        fontFamily: 'KronaOne',
+        elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Color(0xAD9B3BA4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+          textStyle: TextStyle(
+            fontFamily: 'KronaOne',
+            fontSize: 32
+          )
+        )),
       ),
-      home: const HomePage(title: "title"),
+      home: const HomePage(),
     );
   }
 }
