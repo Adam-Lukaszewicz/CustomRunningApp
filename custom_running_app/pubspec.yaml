@@ -38,6 +38,7 @@ dependencies:
   flutter_blue_plus: ^1.33.6
   path_provider: ^2.1.5
   watch_it: ^1.5.1
+  elliptical_progress_bar: ^0.0.1+7
 
 dev_dependencies:
   flutter_test:
