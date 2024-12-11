@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:custom_running_app/services/bluetooth_service.dart';
-import 'package:custom_running_app/subpages/achievments_page.dart';
+import 'package:custom_running_app/subpages/leaderboards_page.dart';
 import 'package:custom_running_app/subpages/integration_page.dart';
 import 'package:custom_running_app/subpages/settings_page.dart';
 import 'package:custom_running_app/subpages/training_page.dart';
@@ -19,7 +19,7 @@ class _ActivePageState extends State<ActivePage> {
   int currentIndex = 0;
   List<Widget> bodies = [
     TrainingPage(),
-    AchievmentsPage(),
+    LeaderboardsPage(),
     IntegrationPage(),
     SettingsPage(),
   ];

@@ -70,6 +70,7 @@ flutter:
     - files/bottomNavBar/integration.png
     - files/bottomNavBar/settings.png
     - files/bottomNavBar/training.png
+    - files/customIcons/filterarrows.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
