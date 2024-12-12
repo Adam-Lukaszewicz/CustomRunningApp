@@ -1,6 +1,6 @@
-import 'package:custom_running_app/device_list_page.dart';
-import 'package:custom_running_app/services/bluetooth_service.dart';
-import 'package:custom_running_app/active_page.dart';
+import 'package:biezniappka/device_list_page.dart';
+import 'package:biezniappka/services/bluetooth_service.dart';
+import 'package:biezniappka/active_page.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 

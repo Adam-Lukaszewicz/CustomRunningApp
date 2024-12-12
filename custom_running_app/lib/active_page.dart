@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:custom_running_app/services/bluetooth_service.dart';
-import 'package:custom_running_app/subpages/leaderboards_page.dart';
-import 'package:custom_running_app/subpages/integration_page.dart';
-import 'package:custom_running_app/subpages/settings_page.dart';
-import 'package:custom_running_app/subpages/training_page.dart';
+import 'package:biezniappka/services/bluetooth_service.dart';
+import 'package:biezniappka/subpages/leaderboards_page.dart';
+import 'package:biezniappka/subpages/integration_page.dart';
+import 'package:biezniappka/subpages/settings_page.dart';
+import 'package:biezniappka/subpages/training_page.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 

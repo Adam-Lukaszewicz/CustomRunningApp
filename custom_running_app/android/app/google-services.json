@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "57777060539",
+    "project_id": "biezniappka",
+    "storage_bucket": "biezniappka.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57777060539:android:c3f6354cf1f76f8bfec79e",
+        "android_client_info": {
+          "package_name": "com.example.custom_running_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjOw3lvWRwz_BtQX7Rbt60oDR6j14b42U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

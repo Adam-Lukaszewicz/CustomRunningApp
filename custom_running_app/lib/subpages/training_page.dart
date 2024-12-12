@@ -63,17 +63,25 @@ class _TrainingPageState extends State<TrainingPage> {
                   ]),
                   child: Column(
                     children: [
-                      Stack(
-                        children: [
-                        EllipticalProgressBar(
-                          fillColor: Colors.green,
-                          bgColor: Color(0xFFB19292),
-                          progress: distanceTravalled%400/400,
-                          showCenterProgress: false,
-                          thickness: 15,
+                      SizedBox(
+                        height: screenHeight * .2,
+                        child: Stack(
+                          children: [
+                          Align(
+                            alignment: Alignment.center,
+                            child: EllipticalProgressBar(
+                              fillColor: Colors.green,
+                              bgColor: Color(0xFFB19292),
+                              progress: distanceTravalled%400/400,
+                              showCenterProgress: false,
+                              thickness: 15,
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Image.asset('files/track.png', scale: 1.2,))
+                          ]
                         ),
-                        Image.asset('files/track.png')
-                        ]
                       )
                     ],
                   ),

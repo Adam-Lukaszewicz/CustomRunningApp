@@ -1,4 +1,4 @@
-import 'package:custom_running_app/services/bluetooth_service.dart';
+import 'package:biezniappka/services/bluetooth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 

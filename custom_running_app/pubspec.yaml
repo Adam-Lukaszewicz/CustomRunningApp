@@ -1,4 +1,4 @@
-name: custom_running_app
+name: biezniappka
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -39,6 +39,8 @@ dependencies:
   path_provider: ^2.1.5
   watch_it: ^1.5.1
   elliptical_progress_bar: ^0.0.1+7
+  firebase_core: ^3.8.1
+  firebase_auth: ^5.3.4
 
 dev_dependencies:
   flutter_test:
