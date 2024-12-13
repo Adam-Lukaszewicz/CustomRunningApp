@@ -7,7 +7,7 @@ class LeaderboardsPage extends StatefulWidget {
   State<LeaderboardsPage> createState() => _LeaderboardsPageState();
 }
 
-enum Filter { day, week, month }
+enum Filter { day, week, month}
 
 class _LeaderboardsPageState extends State<LeaderboardsPage> {
   Filter currentFilter = Filter.week;
