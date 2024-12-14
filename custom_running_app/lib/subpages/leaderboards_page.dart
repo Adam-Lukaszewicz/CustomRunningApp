@@ -1,4 +1,6 @@
+import 'package:biezniappka/services/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 
 class LeaderboardsPage extends StatefulWidget {
   const LeaderboardsPage({super.key});
@@ -16,6 +18,7 @@ class _LeaderboardsPageState extends State<LeaderboardsPage> {
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
+    var dbService = GetIt.I.get<DatabaseService>();
     return Stack(children: [
       Container(
         decoration: BoxDecoration(
@@ -114,7 +117,23 @@ class _LeaderboardsPageState extends State<LeaderboardsPage> {
                       borderRadius: BorderRadius.circular(11),
                     ),
                     height: screenHeight * 0.5,
-                    child: SizedBox.expand(),
+                    child: ListView.builder(
+                      itemCount: dbService.friendsData.length + 1,
+                      itemBuilder: (BuildContext context, int index){
+                        List<(String, double)> nickScores = [];
+                        nickScores.add((dbService.currentUserData.data.nick, dbService.currentUserData.data.getScore(currentFilter)));
+                        for(final key in dbService.friendsData.keys){
+                          nickScores.add((dbService.friendsData[key]!.nick, dbService.friendsData[key]!.getScore(currentFilter)));
+                        }
+                        nickScores.sort((a, b){
+                          return b.$2.compareTo(a.$2);
+                        });
+                        return ListTile(
+                          leading: Text("${index+1}."),
+                          title: Text(nickScores[index].$1),
+                          trailing: Text(nickScores[index].$2.toString()),
+                        );
+                    })
                   ),
                 ],
               ),

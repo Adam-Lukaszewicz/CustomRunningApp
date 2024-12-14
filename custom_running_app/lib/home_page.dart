@@ -1,6 +1,8 @@
 import 'package:biezniappka/device_list_page.dart';
 import 'package:biezniappka/services/bluetooth_service.dart';
 import 'package:biezniappka/active_page.dart';
+import 'package:biezniappka/subpages/leaderboards_page.dart';
+import 'package:biezniappka/subpages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -94,9 +96,38 @@ class _HomePageState extends State<HomePage> {
               child: Text("Start"),
             ),
             SizedBox(height: screenHeight * .015),
-            ElevatedButton(onPressed: () {}, child: Text("Settings")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => SettingsPage()));
+                },
+                child: Text("Settings")),
             SizedBox(height: screenHeight * .015),
-            ElevatedButton(onPressed: () {}, child: Text("Achievments")),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => LeaderboardsPage()));
+                },
+                child: Text("Leaderboards")),
+            SizedBox(height: screenHeight * .2),
+            Row(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color:  Color(0xAD6E2936),
+                    borderRadius: BorderRadius.circular(11)
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Row(
+                      children: [Text("Device connected", style: TextStyle(color: Colors.white, fontSize: 17),), Icon(Icons.circle, color: deviceConnected ? Colors.green : Colors.red,)],
+                    ),
+                  ),
+                )
+              ],
+            )
           ]),
         )),
       ),

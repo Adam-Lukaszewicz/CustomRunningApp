@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:biezniappka/home_page.dart';
+import 'package:biezniappka/models/training_model.dart';
+import 'package:biezniappka/services/database_service.dart';
 import 'package:elliptical_progress_bar/elliptical_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:watch_it/watch_it.dart';
 
 class TrainingPage extends StatefulWidget {
   const TrainingPage({super.key});
@@ -41,6 +45,7 @@ class _TrainingPageState extends State<TrainingPage> {
   Widget build(BuildContext context) {
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
+    var dbService = GetIt.I.get<DatabaseService>();
     return Center(
       child: SizedBox(
         width: screenWidth * 0.8,
@@ -61,30 +66,31 @@ class _TrainingPageState extends State<TrainingPage> {
                         blurRadius: 4,
                         offset: Offset(0, 4)),
                   ]),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: screenHeight * .2,
-                        child: Stack(
-                          children: [
-                          Align(
-                            alignment: Alignment.center,
-                            child: EllipticalProgressBar(
-                              fillColor: Colors.green,
-                              bgColor: Color(0xFFB19292),
-                              progress: distanceTravalled%400/400,
-                              showCenterProgress: false,
-                              thickness: 15,
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.center,
-                            child: Image.asset('files/track.png', scale: 1.2,))
-                          ]
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: screenHeight * .2,
+                    child: Stack(children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: EllipticalProgressBar(
+                          fillColor: Colors.green,
+                          bgColor: Color(0xFFB19292),
+                          progress: distanceTravalled % 400 / 400,
+                          showCenterProgress: false,
+                          thickness: 15,
                         ),
-                      )
-                    ],
-                  ),
+                      ),
+                      Align(
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'files/track.png',
+                            scale: 1.2,
+                          ))
+                    ]),
+                  )
+                ],
+              ),
             ),
             SizedBox(
               height: screenHeight * .03,
@@ -254,11 +260,13 @@ class _TrainingPageState extends State<TrainingPage> {
                                 size: screenWidth * .3,
                                 color: Colors.black,
                               )),
-                  )
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: screenHeight * .03,),
+            SizedBox(
+              height: screenHeight * .03,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -290,18 +298,21 @@ class _TrainingPageState extends State<TrainingPage> {
                             width: screenWidth * .22,
                             height: screenHeight * 0.05,
                             decoration: BoxDecoration(
-                            color: Color(0XFF65306A),
+                              color: Color(0XFF65306A),
                             ),
                           ),
                         ),
                       ),
-                      Text("Incline", style: TextStyle(color: Colors.white, fontSize: 20),),
+                      Text(
+                        "Incline",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
                       ClipPath(
                         clipper: DownwardTriangleClipper(),
                         child: InkWell(
-                          onTap: (){
+                          onTap: () {
                             setState(() {
-                              if(incline > 0){
+                              if (incline > 0) {
                                 incline -= 0.5;
                               }
                             });
@@ -310,7 +321,7 @@ class _TrainingPageState extends State<TrainingPage> {
                             width: screenWidth * .22,
                             height: screenHeight * 0.05,
                             decoration: BoxDecoration(
-                            color: Color(0XFF65306A),
+                              color: Color(0XFF65306A),
                             ),
                           ),
                         ),
@@ -318,7 +329,37 @@ class _TrainingPageState extends State<TrainingPage> {
                     ],
                   ),
                 ),
-                SizedBox(width: screenWidth * 0.15,),
+               if (!(!training && timeElapsed > 10)) SizedBox(
+                  width: screenWidth * 0.15,
+                ),
+                if (!training && timeElapsed > 10)
+                  FilledButton(
+                      style: FilledButton.styleFrom(
+                          shape: CircleBorder(), backgroundColor: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          double score = distanceTravalled * timeElapsed +
+                              elevationClimbed;
+                          TrainingModel thisTraining = TrainingModel(
+                              trainingDate: DateTime.now(),
+                              timeTrained: Duration(seconds: timeElapsed),
+                              distance: distanceTravalled,
+                              elevation: elevationClimbed,
+                              score: score);
+                          dbService.currentUserData.data.trainings.add(thisTraining);
+                          dbService.endTraining(thisTraining);
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage()),
+                              (route) => false);
+                        });
+                      },
+                      child: Icon(
+                        Icons.stop,
+                        size: screenWidth * .15,
+                        color: Colors.black,
+                      )),
                 Container(
                   height: screenHeight * .2,
                   width: screenWidth * .25,
@@ -347,18 +388,21 @@ class _TrainingPageState extends State<TrainingPage> {
                             width: screenWidth * .22,
                             height: screenHeight * 0.05,
                             decoration: BoxDecoration(
-                            color: Color(0XFF65306A),
+                              color: Color(0XFF65306A),
                             ),
                           ),
                         ),
                       ),
-                      Text("Speed", style: TextStyle(color: Colors.white, fontSize: 20),),
+                      Text(
+                        "Speed",
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      ),
                       ClipPath(
                         clipper: DownwardTriangleClipper(),
                         child: InkWell(
-                          onTap: (){
+                          onTap: () {
                             setState(() {
-                              if(speed > 0){
+                              if (speed > 0) {
                                 speed -= 0.5;
                               }
                             });
@@ -367,7 +411,7 @@ class _TrainingPageState extends State<TrainingPage> {
                             width: screenWidth * .22,
                             height: screenHeight * 0.05,
                             decoration: BoxDecoration(
-                            color: Color(0XFF65306A),
+                              color: Color(0XFF65306A),
                             ),
                           ),
                         ),
@@ -389,7 +433,7 @@ class DownwardTriangleClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final path = Path();
     path.lineTo(size.width, 0);
-    path.lineTo(size.width/2, size.height);
+    path.lineTo(size.width / 2, size.height);
     path.lineTo(0, 0);
     return path;
   }
@@ -398,7 +442,6 @@ class DownwardTriangleClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) {
     return false;
   }
-  
 }
 
 class UpwardTriangleClipper extends CustomClipper<Path> {
@@ -407,7 +450,7 @@ class UpwardTriangleClipper extends CustomClipper<Path> {
     final path = Path();
     path.lineTo(0, size.height);
     path.lineTo(size.width, size.height);
-    path.lineTo(size.width/2, 0);
+    path.lineTo(size.width / 2, 0);
     path.lineTo(0, size.height);
     return path;
   }
@@ -416,5 +459,4 @@ class UpwardTriangleClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) {
     return false;
   }
-
 }

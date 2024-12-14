@@ -1,20 +1,25 @@
 import 'dart:convert';
 
 import 'package:biezniappka/models/training_model.dart';
+import 'package:biezniappka/services/database_service.dart';
 import 'package:biezniappka/subpages/leaderboards_page.dart';
+import 'package:watch_it/watch_it.dart';
 
 class AccountModel {
   int code;
+  String nick;
   List<int> friendIds;
   List<TrainingModel> trainings;
   Map<String, double> cachedScores;
 
   AccountModel(
       {int? code,
+      String? nick,
       List<int>? friendIds,
       List<TrainingModel>? trainings,
       Map<String, double>? cachedScores})
       : code = code ?? 0,
+        nick = nick ?? "Guest",
         friendIds = friendIds ?? [],
         trainings = trainings ?? [],
         cachedScores = cachedScores ??
@@ -23,16 +28,16 @@ class AccountModel {
   AccountModel.fromJson(Map<String, dynamic> json)
       : this(
             code: jsonDecode(json["code"]),
+            nick: json["nick"],
             friendIds: List.from(jsonDecode(json["friend_ids"])),
-            trainings: List.from(jsonDecode(json["trainings"])),
             cachedScores: Map.castFrom(jsonDecode(json["cached_scores"])).map(
                 (key, value) => MapEntry(key.toString(), value as double)));
 
   Map<String, dynamic> toJson() {
     return {
       "code": jsonEncode(code),
+      "nick": nick,
       "friend_ids": jsonEncode(friendIds),
-      "trainings": jsonEncode(trainings),
       "cached_scores": jsonEncode(cachedScores)
     };
   }
@@ -66,5 +71,27 @@ class AccountModel {
       Filter.week => cachedScores["week"]!,
       Filter.month => cachedScores["month"]!,
     };
+  }
+
+  void setNickname(String nickname){
+    nick = nickname;
+    GetIt.I.get<DatabaseService>().updateAccount(this);
+  }
+  
+  Future<bool> addFriend(int code) async {
+    var dbService = GetIt.I.get<DatabaseService>();
+    for (var friendCode in friendIds){
+      if(friendCode == code){
+        return false;
+      }
+    }
+    if(await dbService.checkCodeViability(code)){
+      friendIds.add(code);
+      dbService.updateAccount(this);
+      dbService.updateFriends();
+      return true;
+    }else{
+      return false;
+    }
   }
 }

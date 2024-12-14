@@ -6,8 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 class DatabaseService {
   final _db = FirebaseFirestore.instance;
   bool loggedIn = false;
-  late AccountModel currentUserData;
-  late List<AccountModel> friendsData;
+  CurrentUserData currentUserData =
+      CurrentUserData(dbId: "dbId", data: AccountModel());
+  late Map<String, AccountModel> friendsData;
   late CollectionReference _usersRef;
   late DocumentReference _accountRef;
   late CollectionReference _trainingRef;
@@ -21,6 +22,7 @@ class DatabaseService {
 
   void assignUserSpecificData() async {
     if (FirebaseAuth.instance.currentUser != null) {
+      loggedIn = true;
       _accountRef = _db
           .collection("user_data")
           .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -37,26 +39,78 @@ class DatabaseService {
                   TrainingModel.fromJson(snapshots.data()!),
               toFirestore: (trainingModel, _) => trainingModel.toJson());
       _accountRef.get().then((userData) {
-        currentUserData = userData.data() as AccountModel;
-        if (currentUserData.code == 0) {
+        if (userData.data() != null) {
+          currentUserData = CurrentUserData(
+              dbId: userData.id, data: userData.data() as AccountModel);
+        } else {
+          _accountRef.set(currentUserData.data);
+          currentUserData.dbId = FirebaseAuth.instance.currentUser!.uid;
+        }
+        if (currentUserData.data.code == 0) {
           _db.collection("user_data").count().get().then((countQ) {
             if (countQ.count != null) {
-              currentUserData.code = countQ.count!;
+              currentUserData.data.code = countQ.count!;
+              updateAccount(currentUserData.data);
             }
           });
         }
       });
-      List<AccountModel> allUsers;
-      _usersRef.get().then((snapshots) {
-        allUsers = snapshots.docs.map((doc) {
-          return doc.data()! as AccountModel;
+      _trainingRef.get().then((trainings) {
+        currentUserData.data.trainings = trainings.docs.map((doc) {
+          return doc.data()! as TrainingModel;
         }).toList();
-      friendsData = allUsers.where((user){return currentUserData.friendIds.contains(user.code);}).toList();
-      for(var friend in friendsData){
-        friend.updateCache();
-      }
       });
+      updateFriends();
+    } else {
+      currentUserData.dbId = "guest user";
+      currentUserData.data = AccountModel();
     }
+  }
+
+  void logout(){
+    loggedIn = false;
+    currentUserData.dbId = "guest user";
+    currentUserData.data = AccountModel();
+    FirebaseAuth.instance.signOut();
+  }
+
+  void updateFriends() {
+    Map<String, AccountModel> allUsers = {};
+    _usersRef.get().then((snapshots) {
+      for (var doc in snapshots.docs) {
+        allUsers.addAll({doc.id: doc.data()! as AccountModel});
+      }
+      friendsData = {
+        for (final key in allUsers.keys)
+          if (currentUserData.data.friendIds.contains(allUsers[key]!.code))
+            key: allUsers[key]!
+      };
+      for (final key in friendsData.keys) {
+        List<TrainingModel> friendsTrainings;
+        _db
+            .collection("user_data")
+            .doc(key)
+            .collection("trainings")
+            .get()
+            .then((snapshot) {
+          friendsTrainings = snapshot.docs.map((doc) {
+            return doc.data() as TrainingModel;
+          }).toList();
+          friendsData[key]!.trainings = friendsTrainings;
+        });
+      }
+    });
+  }
+
+  Future<bool> checkCodeViability(int code) async {
+    var snapshots = await _usersRef.get(); 
+      for (var doc in snapshots.docs) {
+        AccountModel model = doc.data() as AccountModel;
+        if (model.code == code) {
+          return true;
+        }
+      }
+      return false;
   }
 
   ////////////////// ACCOUNT CRUD //////////////////
@@ -76,4 +130,14 @@ class DatabaseService {
   Stream<QuerySnapshot> getTrainings() {
     return _trainingRef.snapshots();
   }
+
+  void endTraining(TrainingModel training) {
+    _trainingRef.add(training);
+  }
+}
+
+class CurrentUserData {
+  String dbId;
+  AccountModel data;
+  CurrentUserData({required this.dbId, required this.data});
 }

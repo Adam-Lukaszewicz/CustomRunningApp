@@ -1,18 +1,19 @@
 import 'package:biezniappka/home_page.dart';
 import 'package:biezniappka/services/bluetooth_service.dart';
 import 'package:biezniappka/services/database_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  GetIt.I.registerSingleton<BluetoothService>(BluetoothService());
-  GetIt.I.registerSingleton<DatabaseService>(DatabaseService());
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  GetIt.I.registerSingleton<BluetoothService>(BluetoothService());
+  GetIt.I.registerSingleton<DatabaseService>(DatabaseService());
   runApp(const MyApp());
 }
 
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var dbService = GetIt.I.get<DatabaseService>();
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -34,7 +36,15 @@ class MyApp extends StatelessWidget {
                     borderRadius: BorderRadius.circular(11)),
                 textStyle: TextStyle(fontFamily: 'KronaOne', fontSize: 32))),
       ),
-      home: const HomePage(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if(snapshot.hasData){
+            dbService.assignUserSpecificData();
+          }
+          return HomePage();
+        },
+      )
     );
   }
 }

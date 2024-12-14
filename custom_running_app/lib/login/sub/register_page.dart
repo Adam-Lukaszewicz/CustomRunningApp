@@ -106,11 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               );
                               await credential.user?.sendEmailVerification();
                               if (context.mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const LoginPage()),
-                                );
+                                Navigator.pop(context);
                               }
 
                               if (context.mounted) {
