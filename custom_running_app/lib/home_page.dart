@@ -116,13 +116,21 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color:  Color(0xAD6E2936),
-                    borderRadius: BorderRadius.circular(11)
-                  ),
+                      color: Color(0xAD6E2936),
+                      borderRadius: BorderRadius.circular(11)),
                   child: Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: Row(
-                      children: [Text("Device connected", style: TextStyle(color: Colors.white, fontSize: 17),), Icon(Icons.circle, color: deviceConnected ? Colors.green : Colors.red,)],
+                      children: [
+                        Text(
+                          "Device connected",
+                          style: TextStyle(color: Colors.white, fontSize: 17),
+                        ),
+                        Icon(
+                          Icons.circle,
+                          color: deviceConnected ? Colors.green : Colors.red,
+                        )
+                      ],
                     ),
                   ),
                 )
