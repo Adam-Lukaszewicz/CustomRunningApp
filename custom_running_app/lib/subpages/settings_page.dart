@@ -2,8 +2,6 @@ import 'package:biezniappka/home_page.dart';
 import 'package:biezniappka/login/login_page.dart';
 import 'package:biezniappka/services/database_service.dart';
 import 'package:biezniappka/subpages/friends_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:watch_it/watch_it.dart';
 
@@ -18,8 +16,6 @@ class SettingsPage extends StatelessWidget {
         fontWeight: FontWeight.w500,
         fontSize: screenWidth * 0.05,
         color: Colors.white);
-    var subtitleCategoryTextStyle =
-        TextStyle(fontSize: screenWidth * 0.04, color: Colors.white);
     var dbService = GetIt.I.get<DatabaseService>();
     return Stack(children: [
       Container(

@@ -1,6 +1,5 @@
 import 'package:biezniappka/services/database_service.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:watch_it/watch_it.dart';
 
 class FriendsPage extends StatefulWidget {
@@ -100,9 +99,8 @@ class _FriendsPageState extends State<FriendsPage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                bool result = await dbService.currentUserData.data
+                await dbService.currentUserData.data
                     .addFriend(int.parse(inputCode.text));
-                String info = result ? "Successfully added friend" : "Failed to add friend";
               },
               child: Text(
                 "Add friend",

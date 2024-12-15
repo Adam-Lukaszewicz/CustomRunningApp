@@ -2,10 +2,13 @@ import 'package:biezniappka/models/account_model.dart';
 import 'package:biezniappka/models/training_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DatabaseService {
   final _db = FirebaseFirestore.instance;
+  late final SharedPreferences prefs;
   bool loggedIn = false;
+  bool healthConnect = true;
   CurrentUserData currentUserData =
       CurrentUserData(dbId: "dbId", data: AccountModel());
   late Map<String, AccountModel> friendsData;
@@ -14,10 +17,23 @@ class DatabaseService {
   late CollectionReference _trainingRef;
 
   DatabaseService() {
+    getPrefs();
     _usersRef = _db.collection("user_data").withConverter<AccountModel>(
         fromFirestore: (snapshots, _) =>
             AccountModel.fromJson(snapshots.data()!),
         toFirestore: (accountModel, _) => accountModel.toJson());
+  }
+
+  void getPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    bool? result = prefs.getBool("health_connect");
+    if (result != null) {
+      healthConnect = result;
+    }
+  }
+
+  void savePref(bool value) async {
+    prefs.setBool("health_connect", value);
   }
 
   void assignUserSpecificData() async {
@@ -67,7 +83,7 @@ class DatabaseService {
     }
   }
 
-  void logout(){
+  void logout() {
     loggedIn = false;
     currentUserData.dbId = "guest user";
     currentUserData.data = AccountModel();
@@ -97,20 +113,21 @@ class DatabaseService {
             return doc.data() as TrainingModel;
           }).toList();
           friendsData[key]!.trainings = friendsTrainings;
+          friendsData[key]!.updateCache();
         });
       }
     });
   }
 
   Future<bool> checkCodeViability(int code) async {
-    var snapshots = await _usersRef.get(); 
-      for (var doc in snapshots.docs) {
-        AccountModel model = doc.data() as AccountModel;
-        if (model.code == code) {
-          return true;
-        }
+    var snapshots = await _usersRef.get();
+    for (var doc in snapshots.docs) {
+      AccountModel model = doc.data() as AccountModel;
+      if (model.code == code) {
+        return true;
       }
-      return false;
+    }
+    return false;
   }
 
   ////////////////// ACCOUNT CRUD //////////////////
@@ -133,6 +150,8 @@ class DatabaseService {
 
   void endTraining(TrainingModel training) {
     _trainingRef.add(training);
+    currentUserData.data.updateCache();
+    updateAccount(currentUserData.data);
   }
 }
 

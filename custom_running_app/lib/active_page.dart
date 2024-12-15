@@ -1,12 +1,10 @@
 import 'dart:async';
 
-import 'package:biezniappka/services/bluetooth_service.dart';
 import 'package:biezniappka/subpages/leaderboards_page.dart';
 import 'package:biezniappka/subpages/integration_page.dart';
 import 'package:biezniappka/subpages/settings_page.dart';
 import 'package:biezniappka/subpages/training_page.dart';
 import 'package:flutter/material.dart';
-import 'package:watch_it/watch_it.dart';
 
 class ActivePage extends StatefulWidget {
   const ActivePage({super.key});
@@ -47,7 +45,6 @@ class _ActivePageState extends State<ActivePage> {
 
   @override
   Widget build(BuildContext context) {
-    var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     return Stack(
       children: [

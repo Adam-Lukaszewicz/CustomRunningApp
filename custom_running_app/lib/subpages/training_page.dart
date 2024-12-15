@@ -4,8 +4,9 @@ import 'dart:math';
 import 'package:biezniappka/home_page.dart';
 import 'package:biezniappka/models/training_model.dart';
 import 'package:biezniappka/services/database_service.dart';
-import 'package:elliptical_progress_bar/elliptical_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:health/health.dart';
+import 'package:vector_math/vector_math_64.dart' as math;
 import 'package:watch_it/watch_it.dart';
 
 class TrainingPage extends StatefulWidget {
@@ -15,10 +16,15 @@ class TrainingPage extends StatefulWidget {
   State<TrainingPage> createState() => _TrainingPageState();
 }
 
-class _TrainingPageState extends State<TrainingPage> {
+class _TrainingPageState extends State<TrainingPage> with AutomaticKeepAliveClientMixin {
+
+  @override
+  bool get wantKeepAlive => true;
+
+  late DateTime trainingStart;
   bool training = true;
   double elevationClimbed = 0;
-  double distanceTravalled = 0;
+  double distanceTravelled = 0;
   late Timer trainingTimer;
   int timeElapsed = -4;
   double incline = 0;
@@ -26,9 +32,12 @@ class _TrainingPageState extends State<TrainingPage> {
   @override
   void initState() {
     super.initState();
+    trainingStart = DateTime.now();
     trainingTimer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
       if (training) {
         setState(() {
+          distanceTravelled += (1 / 3.6) * speed;
+          elevationClimbed += (1 / 3.6) * tan(math.radians(incline));
           timeElapsed++;
         });
       }
@@ -43,6 +52,7 @@ class _TrainingPageState extends State<TrainingPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
     var dbService = GetIt.I.get<DatabaseService>();
@@ -72,22 +82,20 @@ class _TrainingPageState extends State<TrainingPage> {
                     height: screenHeight * .2,
                     child: Stack(children: [
                       Align(
-                        alignment: Alignment.center,
-                        child: EllipticalProgressBar(
-                          fillColor: Colors.green,
-                          bgColor: Color(0xFFB19292),
-                          progress: distanceTravalled % 400 / 400,
-                          showCenterProgress: false,
-                          thickness: 15,
-                        ),
-                      ),
-                      Align(
                           alignment: Alignment.center,
                           child: Image.asset(
                             'files/track.png',
                             scale: 1.2,
                           ))
                     ]),
+                  ),
+                  Text(
+                    "Distance",
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                  Text(
+                    "${(distanceTravelled / 1000).toStringAsFixed(1)} km",
+                    style: TextStyle(fontSize: 26, color: Colors.white),
                   )
                 ],
               ),
@@ -329,25 +337,38 @@ class _TrainingPageState extends State<TrainingPage> {
                     ],
                   ),
                 ),
-               if (!(!training && timeElapsed > 10)) SizedBox(
-                  width: screenWidth * 0.15,
-                ),
+                if (!(!training && timeElapsed > 10))
+                  SizedBox(
+                    width: screenWidth * 0.15,
+                  ),
                 if (!training && timeElapsed > 10)
                   FilledButton(
                       style: FilledButton.styleFrom(
                           shape: CircleBorder(), backgroundColor: Colors.red),
-                      onPressed: () {
+                      onPressed: () {            
+                        if(dbService.healthConnect){
+                          Health().writeWorkoutData(
+                            activityType: HealthWorkoutActivityType.RUNNING,
+                            start: trainingStart,
+                            end: DateTime.now(),
+                            totalDistance: distanceTravelled.toInt(),
+                            title: "Biezniappka jog");
+                        }           
                         setState(() {
-                          double score = distanceTravalled * timeElapsed +
+                          double score = distanceTravelled * timeElapsed +
                               elevationClimbed;
                           TrainingModel thisTraining = TrainingModel(
-                              trainingDate: DateTime.now(),
+                              trainingStart: trainingStart,
+                              trainingEnd: DateTime.now(),
                               timeTrained: Duration(seconds: timeElapsed),
-                              distance: distanceTravalled,
+                              distance: distanceTravelled,
                               elevation: elevationClimbed,
                               score: score);
-                          dbService.currentUserData.data.trainings.add(thisTraining);
-                          dbService.endTraining(thisTraining);
+                          dbService.currentUserData.data.trainings
+                              .add(thisTraining);
+                          if (dbService.loggedIn) {
+                            dbService.endTraining(thisTraining);
+                          }
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(

@@ -120,7 +120,7 @@ class _LeaderboardsPageState extends State<LeaderboardsPage> {
                     child: ListView.builder(
                       itemCount: dbService.friendsData.length + 1,
                       itemBuilder: (BuildContext context, int index){
-                        List<(String, double)> nickScores = [];
+                        List<(String, int)> nickScores = [];
                         nickScores.add((dbService.currentUserData.data.nick, dbService.currentUserData.data.getScore(currentFilter)));
                         for(final key in dbService.friendsData.keys){
                           nickScores.add((dbService.friendsData[key]!.nick, dbService.friendsData[key]!.getScore(currentFilter)));

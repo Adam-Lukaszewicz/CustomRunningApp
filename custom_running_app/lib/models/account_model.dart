@@ -49,11 +49,11 @@ class AccountModel {
     double totalScore = 0;
     for (var training in trainings) {
       totalScore += training.score;
-      if(DateTime.now().difference(training.trainingDate).inDays < 30){
+      if(DateTime.now().difference(training.trainingStart).inDays < 30){
         monthScore += training.score;
-        if(DateTime.now().difference(training.trainingDate).inDays < 7){
+        if(DateTime.now().difference(training.trainingStart).inDays < 7){
           weekScore += training.score;
-          if(DateTime.now().difference(training.trainingDate).inDays < 1){
+          if(DateTime.now().difference(training.trainingStart).inDays < 1){
             dayScore += training.score;
           }
         }
@@ -65,11 +65,11 @@ class AccountModel {
     cachedScores.update("total", (value) => totalScore);
   }
   
-  double getScore(Filter filter){
+  int getScore(Filter filter){
     return switch(filter){
-      Filter.day => cachedScores["day"]!,
-      Filter.week => cachedScores["week"]!,
-      Filter.month => cachedScores["month"]!,
+      Filter.day => cachedScores["day"]!.toInt(),
+      Filter.week => cachedScores["week"]!.toInt(),
+      Filter.month => cachedScores["month"]!.toInt(),
     };
   }
 

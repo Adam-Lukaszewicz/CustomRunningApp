@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:path_provider/path_provider.dart';
 
-class BluetoothService extends ChangeNotifier{
+class BluetoothService extends ChangeNotifier {
   bool serviceEnabled = false;
 
   bool get isConnected => _isConnected;
   bool _isConnected = false;
-  set isConnected(bool value){
+  set isConnected(bool value) {
     _isConnected = value;
     notifyListeners();
   }
@@ -24,18 +24,22 @@ class BluetoothService extends ChangeNotifier{
     }
   }
 
- Future<void> reconnectToLastDevice() async {
+  Future<void> reconnectToLastDevice() async {
     Directory appDir = await getApplicationDocumentsDirectory();
     File savedId = File('${appDir.path}/remoteId');
     if (savedId.existsSync()) {
       print("found save id");
       String bluetoothId = await savedId.readAsString();
-      await BluetoothDevice.fromId(bluetoothId).connect();
+      try {
+        await BluetoothDevice.fromId(bluetoothId).connect();
+      } on Exception {
+        print("Connection failed");
+      }
       isConnected = true;
     }
   }
 
-   Stream<List<ScanResult>> getBluetoothDeviceList() {
+  Stream<List<ScanResult>> getBluetoothDeviceList() {
     var subscription = FlutterBluePlus.onScanResults.listen(
       (results) {
         if (results.isNotEmpty) {
@@ -65,7 +69,7 @@ class BluetoothService extends ChangeNotifier{
     return FlutterBluePlus.onScanResults;
   }
 
- void testDevice(BluetoothDevice device) async {
+  void testDevice(BluetoothDevice device) async {
     // listen for disconnection
     var subscription =
         device.connectionState.listen((BluetoothConnectionState state) async {
@@ -94,7 +98,7 @@ class BluetoothService extends ChangeNotifier{
     for (var service in services) {
       if (service.serviceUuid.toString() ==
           "cd9cfc21-0ecc-42e5-bf22-48aa715ca112") {
-        for(var characteristic in service.characteristics) {
+        for (var characteristic in service.characteristics) {
           if (characteristic.uuid.toString() ==
               "66E5FFCE-AA96-4DC9-90C3-C62BBCCD29AC".toLowerCase()) {
             String toWrite = "TEST";

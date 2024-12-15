@@ -43,6 +43,10 @@ dependencies:
   firebase_auth: ^5.3.4
   cloud_firestore: ^5.5.1
   fluttertoast: ^8.2.10
+  vector_math: ^2.1.4
+  health: ^11.1.1
+  permission_handler: ^11.3.1
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -75,7 +79,7 @@ flutter:
     - files/bottomNavBar/settings.png
     - files/bottomNavBar/training.png
     - files/customIcons/filterarrows.png
-
+    - files/ghclogo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

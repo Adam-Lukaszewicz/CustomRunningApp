@@ -1,5 +1,4 @@
 import 'package:biezniappka/global%20widgets/warning_dialog.dart';
-import 'package:biezniappka/login/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
