@@ -203,7 +203,7 @@ class ServerCallbacks: public BLEServerCallbacks {
 
 class InputReceivedCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharWriteState) {
-        std::string inputValue = pCharWriteState->getValue();
+        String inputValue = pCharWriteState->getValue();
         if (inputValue.length() > 0) {
           Serial.print("Received Value: ");
           Serial.println(inputValue.c_str());
@@ -211,7 +211,7 @@ class InputReceivedCallbacks: public BLECharacteristicCallbacks {
           parse_command();
           // Send data to client
           delay(1000);
-          std::string outputData = "Last received: " + inputValue;
+          String outputData = "Last received: " + inputValue;
           pOutputChar->setValue(outputData);
           pOutputChar->notify();
         }
@@ -225,7 +225,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(speedReadPin), handleInterrupt,
                   FALLING);
 
-  analogWriteFreq(10000);
+  analogWriteFrequency(motorPwmPin, 10000);
   pinMode(motorPwmPin, OUTPUT);
   pinMode(upPin, OUTPUT);
   pinMode(downPin, OUTPUT);
