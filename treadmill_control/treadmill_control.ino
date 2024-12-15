@@ -140,6 +140,8 @@ ICACHE_RAM_ATTR void handleInterrupt() {
 }
 
 void setup() {
+  pinMode(motorPwmPin, OUTPUT);
+    digitalWrite(motorPwmPin, LOW);
   Serial.begin(9600);
   while (!Serial) {
     ; // czekaj na połączenie z portem szeregowym
