@@ -9,7 +9,7 @@ int ledPin = D0;           // Wbudowana dioda LED na pinie D0
 
 // zmienne pomocnicze
 unsigned long startTime;     // Czas rozpoczęcia
-int pwmValue = 5;            // Wartość PWM, która będzie się zmieniać
+int pwmValue = 0;            // Wartość PWM, która będzie się zmieniać
 int targetValue = 255 * 0.3; // Docelowa wartość PWM (30% z 255)
 String incomingCommand = "";
 int single_rotation_duration = 0; // czas będzie przechowywany w milisekundach
